@@ -62,6 +62,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download built APKs
         uses: actions/download-artifact@v4
         with:
@@ -72,4 +75,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: apks/*.apk
+          body_path: docs/releases/${{ github.ref_name }}.md
           generate_release_notes: true

@@ -1,0 +1,14 @@
+*.iml
+.gradle/
+build/
+/local.properties
+.idea/
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 签名密钥不入库：CI 通过 Secrets（ZRMT_KEYSTORE_BASE64）注入，本地文件保留在本机
+app/keystore/*.keystore
+app/keystore/*.jks
+app/keystore/*.b64

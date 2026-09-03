@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 显示器外壳 -->
+    <path
+        android:pathData="M34,36 L74,36 A4,4 0 0 1 78,40 L78,60 A4,4 0 0 1 74,64 L34,64 A4,4 0 0 1 30,60 L30,40 A4,4 0 0 1 34,36 Z"
+        android:strokeColor="#3B82F6"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000" />
+    <!-- 终端提示符 > -->
+    <path
+        android:pathData="M42,45 L49,50 L42,55"
+        android:strokeColor="#F2F4F8"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+    <!-- 光标下划线 -->
+    <path
+        android:pathData="M54,55 L66,55"
+        android:strokeColor="#3B82F6"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <!-- 底座 -->
+    <path
+        android:pathData="M54,64 L54,70 M45,71 L63,71"
+        android:strokeColor="#3B82F6"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+</vector>

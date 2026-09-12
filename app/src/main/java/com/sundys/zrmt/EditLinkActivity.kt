@@ -10,7 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 
-class EditLinkActivity : Activity() {
+class EditLinkActivity : ThemedActivity() {
 
     private lateinit var store: LinkStore
     private var editing: Link? = null

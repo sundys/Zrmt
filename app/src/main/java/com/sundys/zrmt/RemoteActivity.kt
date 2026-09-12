@@ -29,7 +29,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 
-class RemoteActivity : Activity() {
+class RemoteActivity : ThemedActivity() {
 
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar

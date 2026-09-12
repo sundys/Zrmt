@@ -17,7 +17,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MainActivity : Activity() {
+class MainActivity : ThemedActivity() {
+
+    private var appliedTheme: String? = null
 
     private lateinit var store: LinkStore
     private lateinit var adapter: CardAdapter
@@ -28,6 +30,7 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        appliedTheme = AppPrefs.themeMode(this)
         store = LinkStore(this)
 
         tvCount = findViewById(R.id.tvCount)
@@ -45,10 +48,18 @@ class MainActivity : Activity() {
         findViewById<View>(R.id.fab).setOnClickListener {
             startActivity(Intent(this, EditLinkActivity::class.java))
         }
+        findViewById<View>(R.id.btnSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        // 主题设置变化时重建以应用新配色
+        if (appliedTheme != null && AppPrefs.themeMode(this) != appliedTheme) {
+            recreate()
+            return
+        }
         refresh()
     }
 

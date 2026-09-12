@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zrmt 文件上传测试</title>
+<style>
+  body { font-family: sans-serif; padding: 24px; background: #14161C; color: #F2F4F8; }
+  input { color: #F2F4F8; margin-bottom: 16px; }
+  pre { color: #5CA8FF; white-space: pre-wrap; }
+  h4 { margin: 18px 0 6px; }
+</style>
+</head>
+<body>
+<h3>Zrmt 文件上传测试页</h3>
+<h4>1. 选择图片（可多选，accept=image/*）</h4>
+<input type="file" id="f1" accept="image/*" multiple>
+<h4>2. 任意附件（不过滤类型）</h4>
+<input type="file" id="f2">
+<pre id="out">等待选择…（选中后此处会显示文件名，证明 onShowFileChooser 生效）</pre>
+<script>
+function show(e) {
+  var fs = e.target.files;
+  var names = [];
+  for (var i = 0; i < fs.length; i++) {
+    names.push('- ' + fs[i].name + ' (' + fs[i].type + ', ' + fs[i].size + ' B)');
+  }
+  document.getElementById('out').textContent = '已选择 ' + fs.length + ' 个文件：\n' + names.join('\n');
+}
+document.getElementById('f1').onchange = show;
+document.getElementById('f2').onchange = show;
+</script>
+</body>
+</html>

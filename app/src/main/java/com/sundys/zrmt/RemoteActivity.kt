@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.ValueCallback
 import android.widget.PopupMenu
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -39,6 +41,7 @@ class RemoteActivity : Activity() {
     private var customView: View? = null
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
     private var pendingWebPermission: PermissionRequest? = null
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var desktopUa = false
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -113,7 +116,7 @@ class RemoteActivity : Activity() {
             cacheMode = WebSettings.LOAD_DEFAULT
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             allowFileAccess = false
-            allowContentAccess = false
+            allowContentAccess = true
             textZoom = 100
         }
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
@@ -174,6 +177,36 @@ class RemoteActivity : Activity() {
                 runOnUiThread { handleWebPermission(request) }
             }
 
+            override fun onShowFileChooser(
+                webView: WebView?,
+                callback: ValueCallback<Array<Uri>>,
+                params: FileChooserParams
+            ): Boolean {
+                // 上一次未完成的回调先释放，否则网页的文件输入框会"点了没反应"
+                filePathCallback?.onReceiveValue(null)
+                filePathCallback = callback
+
+                requestStoragePermissionIfNeeded()
+
+                val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = resolveMimeType(params.acceptTypes)
+                    if (params.mode == FileChooserParams.MODE_OPEN_MULTIPLE) {
+                        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    }
+                }
+                val chooser = Intent.createChooser(intent, null)
+                return try {
+                    startActivityForResult(chooser, REQ_FILE_CHOOSER)
+                    true
+                } catch (_: ActivityNotFoundException) {
+                    filePathCallback = null
+                    callback.onReceiveValue(null)
+                    Toast.makeText(this@RemoteActivity, R.string.no_file_manager, Toast.LENGTH_SHORT).show()
+                    false
+                }
+            }
+
             override fun onShowCustomView(view: View, callback: CustomViewCallback) {
                 if (customView != null) {
                     callback.onCustomViewHidden()
@@ -196,6 +229,59 @@ class RemoteActivity : Activity() {
                 super.onHideCustomView()
             }
         }
+    }
+
+    /** 根据网页声明的 accept 类型选择选择器的 MIME 过滤 */
+    private fun resolveMimeType(acceptTypes: Array<out String>?): String {
+        val types = acceptTypes?.filter { it.isNotBlank() }.orEmpty()
+        if (types.isEmpty()) return "*/*"
+        val all = types.map { it.lowercase() }
+        return when {
+            all.all { it.startsWith("image/") || it == ".png" || it == ".jpg" || it == ".jpeg" || it == ".gif" || it == ".webp" } -> "image/*"
+            all.all { it.startsWith("video/") || it == ".mp4" || it == ".mov" } -> "video/*"
+            all.all { it.startsWith("audio/") || it == ".mp3" || it == ".wav" } -> "audio/*"
+            else -> "*/*"
+        }
+    }
+
+    /** 选择文件前按需请求媒体读取权限（拒绝也不影响系统选择器可用） */
+    private fun requestStoragePermissionIfNeeded() {
+        val perms = if (Build.VERSION.SDK_INT >= 33)
+            arrayOf(
+                android.Manifest.permission.READ_MEDIA_IMAGES,
+                android.Manifest.permission.READ_MEDIA_VIDEO
+            )
+        else
+            arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        val missing = perms.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isNotEmpty()) {
+            requestPermissions(missing.toTypedArray(), REQ_STORAGE)
+        }
+    }
+
+    /** 解析选择结果，支持多选（clipData） */
+    private fun extractPickedUris(resultCode: Int, data: Intent?): Array<Uri>? {
+        if (resultCode != RESULT_OK || data == null) return null
+        val clip = data.clipData
+        if (clip != null && clip.itemCount > 0) {
+            val list = ArrayList<Uri>(clip.itemCount)
+            for (i in 0 until clip.itemCount) {
+                val uri = clip.getItemAt(i).uri ?: continue
+                list.add(uri)
+            }
+            if (list.isNotEmpty()) return list.toTypedArray()
+        }
+        return data.data?.let { arrayOf(it) }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode != REQ_FILE_CHOOSER) {
+            super.onActivityResult(requestCode, resultCode, data)
+            return
+        }
+        val callback = filePathCallback
+        filePathCallback = null
+        callback?.onReceiveValue(extractPickedUris(resultCode, data))
     }
 
     private fun handleWebPermission(request: PermissionRequest) {
@@ -322,6 +408,8 @@ class RemoteActivity : Activity() {
         const val EXTRA_VERSION = "version"
         const val EXTRA_HOST = "host"
         private const val REQ_PERM = 4001
+        private const val REQ_FILE_CHOOSER = 5002
+        private const val REQ_STORAGE = 5003
 
         private const val DESKTOP_UA =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +

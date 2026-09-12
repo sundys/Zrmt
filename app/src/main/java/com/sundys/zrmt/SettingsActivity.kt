@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -39,21 +40,29 @@ class SettingsActivity : ThemedActivity() {
         val rbSystem = findViewById<RadioButton>(R.id.rbSystem)
         val rbLight = findViewById<RadioButton>(R.id.rbLight)
         val rbDark = findViewById<RadioButton>(R.id.rbDark)
-        when (AppPrefs.themeMode(this)) {
-            AppPrefs.THEME_LIGHT -> rbLight.isChecked = true
-            AppPrefs.THEME_DARK -> rbDark.isChecked = true
-            else -> rbSystem.isChecked = true
-        }
-        val onThemeChange = { mode: String ->
-            if (mode != AppPrefs.themeMode(this)) {
-                AppPrefs.setThemeMode(this, mode)
-                recreate()
+        val themeRows = listOf(
+            rbSystem to AppPrefs.THEME_SYSTEM,
+            rbLight to AppPrefs.THEME_LIGHT,
+            rbDark to AppPrefs.THEME_DARK
+        )
+        fun highlightThemeRows() {
+            val mode = AppPrefs.themeMode(this)
+            themeRows.forEach { (rb, value) ->
+                val checked = value == mode
+                rb.isChecked = checked
+                rb.setTextColor(getColor(if (checked) R.color.accent else R.color.text_primary))
+                rb.typeface = if (checked) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
             }
-            Unit
         }
-        rbSystem.setOnClickListener { onThemeChange(AppPrefs.THEME_SYSTEM) }
-        rbLight.setOnClickListener { onThemeChange(AppPrefs.THEME_LIGHT) }
-        rbDark.setOnClickListener { onThemeChange(AppPrefs.THEME_DARK) }
+        highlightThemeRows()
+        themeRows.forEach { (rb, value) ->
+            rb.setOnClickListener {
+                if (value != AppPrefs.themeMode(this)) {
+                    AppPrefs.setThemeMode(this, value)
+                    recreate()
+                }
+            }
+        }
 
         // GitHub 代理前缀
         refreshProxyLabel()

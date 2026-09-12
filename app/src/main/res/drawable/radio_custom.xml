@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 选中：蓝色圆环 + 实心圆点 -->
+    <item android:state_checked="true">
+        <inset
+            android:insetBottom="4dp"
+            android:insetLeft="2dp"
+            android:insetRight="10dp"
+            android:insetTop="4dp">
+            <layer-list>
+                <item
+                    android:width="20dp"
+                    android:height="20dp"
+                    android:gravity="center">
+                    <shape android:shape="oval">
+                        <solid android:color="@android:color/transparent" />
+                        <stroke android:width="2dp" android:color="@color/accent" />
+                    </shape>
+                </item>
+                <item
+                    android:width="10dp"
+                    android:height="10dp"
+                    android:gravity="center">
+                    <shape android:shape="oval">
+                        <solid android:color="@color/accent" />
+                    </shape>
+                </item>
+            </layer-list>
+        </inset>
+    </item>
+    <!-- 未选中：灰色圆环 -->
+    <item>
+        <inset
+            android:insetBottom="4dp"
+            android:insetLeft="2dp"
+            android:insetRight="10dp"
+            android:insetTop="4dp">
+            <layer-list>
+                <item
+                    android:width="20dp"
+                    android:height="20dp"
+                    android:gravity="center">
+                    <shape android:shape="oval">
+                        <solid android:color="@android:color/transparent" />
+                        <stroke android:width="2dp" android:color="@color/text_tertiary" />
+                    </shape>
+                </item>
+            </layer-list>
+        </inset>
+    </item>
+</selector>

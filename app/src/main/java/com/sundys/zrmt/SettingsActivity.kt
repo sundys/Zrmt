@@ -100,16 +100,13 @@ class SettingsActivity : ThemedActivity() {
     }
 
     private fun editProxy() {
-        val input = EditText(this).apply {
-            hint = getString(R.string.proxy_hint)
-            setText(AppPrefs.githubProxy(this@SettingsActivity))
-            val pad = (resources.displayMetrics.density * 20).toInt()
-            setPadding(pad, pad / 2, pad, 0)
-        }
+        val view = layoutInflater.inflate(R.layout.dialog_proxy, null)
+        val input = view.findViewById<EditText>(R.id.etProxy)
+        input.setText(AppPrefs.githubProxy(this))
+        input.setSelection(input.text.length)
         AlertDialog.Builder(this)
             .setTitle(R.string.github_proxy)
-            .setMessage(R.string.proxy_message)
-            .setView(input)
+            .setView(view)
             .setPositiveButton(R.string.save) { _, _ ->
                 AppPrefs.setGithubProxy(this, input.text.toString())
                 refreshProxyLabel()

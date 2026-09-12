@@ -33,6 +33,9 @@
     <string name="settings_title">设置</string>
     <string name="section_appearance">外观</string>
     <string name="section_general">通用</string>
+    <string name="theme_color">主题颜色</string>
+    <string name="theme_current">当前：%1$s</string>
+    <string name="select_theme">选择主题模式</string>
     <string name="theme_system">跟随系统</string>
     <string name="theme_light">日间模式</string>
     <string name="theme_dark">夜间模式</string>

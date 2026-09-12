@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -36,32 +35,35 @@ class SettingsActivity : ThemedActivity() {
         findViewById<TextView>(R.id.tvVersion).text =
             getString(R.string.current_version, versionName)
 
-        // 主题选择
-        val rbSystem = findViewById<RadioButton>(R.id.rbSystem)
-        val rbLight = findViewById<RadioButton>(R.id.rbLight)
-        val rbDark = findViewById<RadioButton>(R.id.rbDark)
-        val themeRows = listOf(
-            rbSystem to AppPrefs.THEME_SYSTEM,
-            rbLight to AppPrefs.THEME_LIGHT,
-            rbDark to AppPrefs.THEME_DARK
+        // 主题颜色（弹出单选）
+        val tvTheme = findViewById<TextView>(R.id.tvTheme)
+        fun modeLabel(mode: String): String = getString(
+            when (mode) {
+                AppPrefs.THEME_LIGHT -> R.string.theme_light
+                AppPrefs.THEME_DARK -> R.string.theme_dark
+                else -> R.string.theme_system
+            }
         )
-        fun highlightThemeRows() {
-            val mode = AppPrefs.themeMode(this)
-            themeRows.forEach { (rb, value) ->
-                val checked = value == mode
-                rb.isChecked = checked
-                rb.setTextColor(getColor(if (checked) R.color.accent else R.color.text_primary))
-                rb.typeface = if (checked) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
-            }
+        fun refreshThemeLabel() {
+            tvTheme.text = getString(R.string.theme_current, modeLabel(AppPrefs.themeMode(this)))
         }
-        highlightThemeRows()
-        themeRows.forEach { (rb, value) ->
-            rb.setOnClickListener {
-                if (value != AppPrefs.themeMode(this)) {
-                    AppPrefs.setThemeMode(this, value)
-                    recreate()
+        refreshThemeLabel()
+        findViewById<View>(R.id.rowTheme).setOnClickListener {
+            val modes = listOf(AppPrefs.THEME_SYSTEM, AppPrefs.THEME_LIGHT, AppPrefs.THEME_DARK)
+            val labels = modes.map { modeLabel(it) }.toTypedArray()
+            val checked = modes.indexOf(AppPrefs.themeMode(this))
+            AlertDialog.Builder(this)
+                .setTitle(R.string.select_theme)
+                .setSingleChoiceItems(labels, checked) { dialog, which ->
+                    dialog.dismiss()
+                    val mode = modes[which]
+                    if (mode != AppPrefs.themeMode(this)) {
+                        AppPrefs.setThemeMode(this, mode)
+                        recreate()
+                    }
                 }
-            }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
         }
 
         // GitHub 代理前缀
